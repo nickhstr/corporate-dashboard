@@ -20,6 +20,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="papa-parse.html">
 <link rel="import" href="my-icons.html">
 
 <dom-module id="my-app">
@@ -97,7 +99,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             fallback-selection="view404"
             role="main">
           <my-view1 name="view1"></my-view1>
-          <my-view2 name="view2"></my-view2>
+          <my-view2 name="view2" customers="[[customers]]"></my-view2>
           <my-view3 name="view3"></my-view3>
           <my-view404 name="view404"></my-view404>
         </iron-pages>
@@ -114,6 +116,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           reflectToAttribute: true,
           observer: '_pageChanged'
+        },
+        openIssues: {},
+        customers: {
+          type: Array,
+          value: [],
+          notify: true
         }
       },
 
@@ -123,6 +131,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _routePageChanged: function(page) {
         this.page = page || 'view1';
+        var drawer = this.$$('app-drawer');
+        if (drawer.opened && window.innerWidth < 641) {
+          drawer.close();
+        }
       },
 
       _pageChanged: function(page) {
@@ -133,6 +145,29 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _showPage404: function() {
         this.page = 'view404';
+      },
+
+      ready: function() {
+        this.parseCsv("/data/key-metrics.csv");
+      },
+
+      parseCsv: function(pathToCsv) {
+        var self = this;
+        Papa.parse(pathToCsv, {
+          download: true,
+          complete: function(results) {
+            self.setCustomers(results.data.slice(1));
+          }
+        });
+      },
+
+      setCustomers: function(data) {
+        var customers = data.map(function(item) {
+          item[1] = parseInt(item[1], 10);
+          return item;
+        });
+        customers.reverse();
+        this.customers = customers;
       }
     });
   </script>
