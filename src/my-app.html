@@ -21,6 +21,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="papa-parse.html">
 <link rel="import" href="my-icons.html">
 
@@ -28,13 +29,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
   <template>
     <style>
       :host {
-        --app-primary-color: #4285f4;
+        --app-primary-color: #3F51B5;
         --app-secondary-color: black;
 
         display: block;
       }
 
-      app-header {
+      app-header, app-toolbar {
         color: #fff;
         background-color: var(--app-primary-color);
       }
@@ -65,6 +66,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
     </style>
 
+    <iron-ajax
+        id="issuesAjax"
+        auto
+        url="/data/issues.json"
+        handle-as="json"
+        on-response="handleIssues"></iron-ajax>
+
     <app-location route="{{route}}"></app-location>
     <app-route
         route="{{route}}"
@@ -77,9 +85,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-drawer>
         <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="view1" href="/view1">View One</a>
-          <a name="view2" href="/view2">View Two</a>
-          <a name="view3" href="/view3">View Three</a>
+          <a name="home" href="/home">Home</a>
+          <a name="metrics" href="/metrics">Key Metrics</a>
+          <a name="issues" href="/issues">All Issues</a>
         </iron-selector>
       </app-drawer>
 
@@ -98,10 +106,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             attr-for-selected="name"
             fallback-selection="view404"
             role="main">
-          <my-view1 name="view1"></my-view1>
-          <my-view2 name="view2" customers="[[customers]]"></my-view2>
-          <my-view3 name="view3"></my-view3>
-          <my-view404 name="view404"></my-view404>
+          <dash-home name="home"></dash-home>
+          <dash-metrics name="metrics" open-issues="[[openIssues]]" customers="[[customers]]" total-issues="[[totalIssues]]"></dash-metrics>
+          <dash-issues name="issues" issues="[[allIssues]]"></dash-issues>
+          <dash-404 name="404"></dash-404>
         </iron-pages>
       </app-header-layout>
     </app-drawer-layout>
@@ -117,10 +125,27 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           reflectToAttribute: true,
           observer: '_pageChanged'
         },
-        openIssues: {},
+        openIssues: {
+          type: Number,
+          value: 0,
+          notify: true
+        },
         customers: {
           type: Array,
           value: [],
+          notify: true
+        },
+        totalIssues: {
+          type: Array,
+          value: [1, 2],
+          notify: true
+        },
+        allIssues: {
+          type: Array,
+          value: [],
+          notify: true
+        },
+        updateInterval: {
           notify: true
         }
       },
@@ -130,7 +155,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       ],
 
       _routePageChanged: function(page) {
-        this.page = page || 'view1';
+        this.page = page || 'home';
         var drawer = this.$$('app-drawer');
         if (drawer.opened && window.innerWidth < 641) {
           drawer.close();
@@ -139,16 +164,21 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _pageChanged: function(page) {
         // Load page import on demand. Show 404 page if fails
-        var resolvedPageUrl = this.resolveUrl('my-' + page + '.html');
+        var resolvedPageUrl = this.resolveUrl('dash-' + page + '.html');
         this.importHref(resolvedPageUrl, null, this._showPage404, true);
       },
 
       _showPage404: function() {
-        this.page = 'view404';
+        this.page = '404';
       },
 
       ready: function() {
-        this.parseCsv("/data/key-metrics.csv");
+        var self = this;
+        this.parseCsv('/data/key-metrics.csv');
+        setInterval(function() {
+          self.parseCsv('/data/key-metrics.csv');
+          self.$.issuesAjax.generateRequest();
+        }, 5000);
       },
 
       parseCsv: function(pathToCsv) {
@@ -168,6 +198,34 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         });
         customers.reverse();
         this.customers = customers;
+      },
+
+      handleIssues: function(e) {
+        this.setOpenIssues(e.detail.response);
+        this.setTotalIssues(e.detail.response);
+        this.allIssues = e.detail.response;
+      },
+
+      setOpenIssues: function(data) {
+        var openIssues = data.filter(function(item) {
+          return item.open;
+        });
+        this.openIssues = openIssues.length;
+      },
+
+      setTotalIssues: function(data) {
+        var totalIssues = [['2011',0], ['2012',0], ['2013',0], ['2014',0], ['2015',0], ['2016',0]];
+        data.forEach(function(issue) {
+          var date = new Date(issue['opened_timestamp']);
+          date = [date.getFullYear().toString()];
+          for (var i = 0; i < totalIssues.length; i++) {
+            if (date == totalIssues[i][0]) {
+              totalIssues[i][1] += 1;
+              break;
+            }
+          }
+        });
+        this.totalIssues = totalIssues;
       }
     });
   </script>
