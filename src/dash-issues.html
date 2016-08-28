@@ -1,0 +1,106 @@
+<!--
+@license
+Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
+This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
+The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
+The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
+Code distributed by Google as part of the polymer project is also
+subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
+-->
+
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<dom-module id="dash-issues">
+  <template>
+    <style>
+      :host {
+        display: block;
+        padding: 10px;
+      }
+
+      table {
+        border-collapse: collapse;
+        font-size: 0.8em;
+      }
+
+      td, th {
+        padding: 1em;
+      }
+
+      tr:nth-child(even) {
+        background-color: #ddd;
+      }
+
+      button {
+        border: none;
+        background-color: inherit;
+        font-weight: bolder;
+        font-size: inherit;
+        font-family: inherit;
+      }
+
+      button:hover {
+        cursor: pointer;
+      }
+
+      .open-status {
+        text-transform: capitalize;
+      }
+
+
+      @media (max-width: 640) {
+        td, th {
+          padding: 0.5em;
+        }
+      }
+    </style>
+    <table>
+      <tr>
+        <th><button>Opened</button></th>
+        <th><button>Customer</button></th>
+        <th><button>Email</button></th>
+        <th><button>Description</button></th>
+        <th><button>Open</button></th>
+        <th><button>Closed</button></th>
+        <th><button>Employee</button></th>
+      </tr>
+      <template is="dom-repeat" items="[[issues]]">
+        <tr>
+          <td>[[_computeDate(item.opened_timestamp)]]</td>
+          <td>[[item.customer_name]]</td>
+          <td>[[item.email]]</td>
+          <td>[[item.description]]</td>
+          <td class="open-status">[[item.open]]</td>
+          <td>[[_computeDate(item.closed_timestamp)]]</td>
+          <td>[[item.employee_name]]</td>
+        </tr>
+      </template>
+    </table>
+  </template>
+
+  <script>
+    Polymer({
+
+      is: 'dash-issues',
+
+      properties: {
+        issues: {
+          type: Array,
+          value: [],
+          notify: true
+        }
+      },
+
+      _computeDate: function(date) {
+        if (date) {
+          var time = new Date(date);
+          return time.toDateString();
+        }
+        else {
+          return '';
+        }
+      }
+
+    });
+  </script>
+</dom-module>
