@@ -27,19 +27,25 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         transition: opacity 300ms;
       }
 
-      google-chart {
-        width: 64vw;
-        height: 48vw;
-        margin: 0.5em;
+      .shadow {
         box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
                   0 1px 5px 0 rgba(0, 0, 0, 0.12),
                   0 3px 1px -2px rgba(0, 0, 0, 0.2);
       }
 
-      h2 {
+      google-chart {
         width: 100%;
+        height: 42vw;
+        margin: 0.5em;
+      }
+
+      h2 {
+        width: 30vw;
         text-align: center;
-        font-weight: 300;
+        font-weight: 400;
+        margin: 0.5em;
+        padding: 1em;
+        background-color: var(--app-selected-color);
       }
 
 
@@ -48,16 +54,22 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           width: 96vw;
           height: 72vw;
         }
+
+        h2 {
+          width: 50vw;
+        }
       }
     </style>
     <section id="charts">
-      <h2>Open Issues: [[openIssues]]</h2>
+      <h2 class="shadow">Open Issues: [[openIssues]]</h2>
       <google-chart
+          class="shadow"
           type="line"
           options='{"title":"Number of Customers"}'
           cols='[{"label":"Year", "type":"string"}, {"label":"Customers", "type":"number"}]'
           rows="[[customers]]"></google-chart>
       <google-chart
+          class="shadow"
           type="bar"
           options='{"title":"Number of Reported Issues"}'
           cols='[{"label":"Year", "type":"string"}, {"label": "Issues", "type": "number"}]'
