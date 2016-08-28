@@ -25,13 +25,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="papa-parse.html">
 <link rel="import" href="my-icons.html">
 
-<dom-module id="my-app">
+<dom-module id="dash-app">
   <template>
     <style>
       :host {
         --app-primary-color: #3F51B5;
         --app-secondary-color: black;
-
+        --app-selected-color: #C5CAE9;
         display: block;
       }
 
@@ -39,6 +39,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         color: #fff;
         background-color: var(--app-primary-color);
       }
+
       app-header paper-icon-button {
         --paper-icon-button-ink-color: white;
       }
@@ -49,20 +50,20 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       .drawer-list a {
         display: block;
-
         padding: 0 16px;
-
         text-decoration: none;
-
         color: var(--app-secondary-color);
-
         line-height: 40px;
       }
 
       .drawer-list a.iron-selected {
         color: black;
-
         font-weight: bold;
+        background-color: var(--app-selected-color);
+      }
+
+      .subtitle {
+        font-size: 0.7em;
       }
     </style>
 
@@ -72,6 +73,12 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         url="/data/issues.json"
         handle-as="json"
         on-response="handleIssues"></iron-ajax>
+    <iron-ajax
+        id="locationsAjax"
+        auto
+        url="/data/employee-locations.json"
+        handle-as="json"
+        on-response="handleLocations"></iron-ajax>
 
     <app-location route="{{route}}"></app-location>
     <app-route
@@ -80,12 +87,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         data="{{routeData}}"
         tail="{{subroute}}"></app-route>
 
-    <app-drawer-layout fullbleed>
+    <app-drawer-layout fullbleed responsive-width="800px">
       <!-- Drawer content -->
       <app-drawer>
         <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
           <a name="home" href="/home">Home</a>
+          <a name="map" href="/map">Map</a>
           <a name="metrics" href="/metrics">Key Metrics</a>
           <a name="issues" href="/issues">All Issues</a>
         </iron-selector>
@@ -97,7 +105,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         <app-header condenses reveals effects="waterfall">
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-            <div main-title>My App</div>
+            <div main-title>Dashboard</div>
+            <div class="subtitle">[[subtitle]]</div>
           </app-toolbar>
         </app-header>
 
@@ -107,7 +116,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
             fallback-selection="view404"
             role="main">
           <dash-home name="home"></dash-home>
-          <dash-metrics name="metrics" open-issues="[[openIssues]]" customers="[[customers]]" total-issues="[[totalIssues]]"></dash-metrics>
+          <dash-metrics
+              name="metrics"
+              open-issues="[[openIssues]]"
+              customers="[[customers]]"
+              total-issues="[[totalIssues]]"></dash-metrics>
           <dash-issues name="issues" issues="[[allIssues]]"></dash-issues>
           <dash-404 name="404"></dash-404>
         </iron-pages>
@@ -117,7 +130,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
   <script>
     Polymer({
-      is: 'my-app',
+      is: 'dash-app',
 
       properties: {
         page: {
@@ -145,7 +158,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: [],
           notify: true
         },
-        updateInterval: {
+        locations: {
+          type: Array,
+          value: [],
+          notify: true
+        },
+        subtitle: {
+          type: String,
+          value: '',
           notify: true
         }
       },
@@ -156,9 +176,26 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _routePageChanged: function(page) {
         this.page = page || 'home';
+        switch (page) {
+          case 'home':
+            this.subtitle = ' Home';
+            break;
+          case 'map':
+            this.subtitle = ' Map';
+            break;
+          case 'metrics':
+            this.subtitle = ' Key Metrics';
+            break;
+          case 'issues':
+            this.subtitle = ' All Issues';
+            break;
+          default:
+            this.subtitle = '';
+            break;
+        }
         Polymer.AppLayout.scroll({top: 0, behavior: 'silent'});
         var drawer = this.$$('app-drawer');
-        if (drawer.opened && window.innerWidth <= 640) {
+        if (drawer.opened && window.innerWidth <= 800) {
           drawer.close();
         }
       },
@@ -179,7 +216,8 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         setInterval(function() {
           self.parseCsv('/data/key-metrics.csv');
           self.$.issuesAjax.generateRequest();
-        }, 5000);
+          self.$.locationsAjax.generateRequest();
+        }, 3000);
       },
 
       parseCsv: function(pathToCsv) {
@@ -205,6 +243,10 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.setOpenIssues(e.detail.response);
         this.setTotalIssues(e.detail.response);
         this.allIssues = e.detail.response;
+      },
+
+      handleLocations: function(e) {
+        this.locations = e.detail.response;
       },
 
       setOpenIssues: function(data) {
