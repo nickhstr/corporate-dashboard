@@ -1,10 +1,48 @@
 <link rel="import" href="../bower_components/polymer/polymer.html">
+<link rel="import" href="../bower_components/google-map/google-map.html">
+<link rel="import" href="../bower_components/google-map/google-map-marker.html">
+<link rel="import" href="shared-styles.html">
 
 <dom-module id="dash-map">
-	<template></template>
+	<template>
+		<style include="shared-styles">
+			:host {
+				display: block;
+				padding: 10px;
+			}
+
+			section {
+				display: flex;
+				flex-wrap: wrap;
+				justify-content: flex-start;
+			}
+
+			google-map {
+				width: 100%;
+				height: 75vh;
+			}
+		</style>
+		
+		<section>
+			<h2>Company Locations</h2>
+			<google-map class="shadow" fit-to-markers api-key="AIzaSyAX7MGP8v12K7Sc-KcXlLhG7gFg5SSgOKw">
+				<template is="dom-repeat" items="[[locations]]">
+					<google-map-marker title="Number of Employees" latitude="[[item.latitude]]" longitude="[[item.longitude]]">Number of Employees: [[item.employees]]</google-map-marker>
+				</template>
+			</google-map>
+		</section>
+	</template>
 	<script>
 		Polymer({
-			is: 'dash-map'
+			is: 'dash-map',
+
+			properties: {
+				locations: {
+					type: Array,
+					value: [],
+					notify: true
+				}
+			}
 		});
 	</script>
 </dom-module>
