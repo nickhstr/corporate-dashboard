@@ -21,10 +21,18 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       table {
         border-collapse: collapse;
         font-size: 0.8em;
+        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+                  0 1px 5px 0 rgba(0, 0, 0, 0.12),
+                  0 3px 1px -2px rgba(0, 0, 0, 0.2);
       }
 
       td, th {
         padding: 1em;
+      }
+
+      th {
+        padding: 1.5em 1em;
+        background-color: #fff;
       }
 
       tr:nth-child(even) {
@@ -47,6 +55,16 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         text-transform: capitalize;
       }
 
+      .up::after {
+        content: "▲";
+        font-size: 0.75em;
+      }
+
+      .down::after {
+        content: "▼";
+        font-size: 0.75em;
+      }
+
 
       @media (max-width: 640) {
         td, th {
@@ -56,15 +74,15 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     </style>
     <table>
       <tr>
-        <th><button>Opened</button></th>
-        <th><button>Customer</button></th>
-        <th><button>Email</button></th>
-        <th><button>Description</button></th>
-        <th><button>Open</button></th>
-        <th><button>Closed</button></th>
-        <th><button>Employee</button></th>
+        <th><button on-tap="updateSort" value="opened_timestamp">Opened</button></th>
+        <th><button on-tap="updateSort" value="customer_name">Customer</button></th>
+        <th><button on-tap="updateSort" value="email">Email</button></th>
+        <th><button on-tap="updateSort" value="description">Description</button></th>
+        <th><button on-tap="updateSort" value="open">Open</button></th>
+        <th><button on-tap="updateSort" value="closed_timestamp">Closed</button></th>
+        <th><button on-tap="updateSort" value="employee_name">Employee</button></th>
       </tr>
-      <template is="dom-repeat" items="[[issues]]">
+      <template is="dom-repeat" items="[[issues]]" sort="[[sort]]" filter="[[filter]]">
         <tr>
           <td>[[_computeDate(item.opened_timestamp)]]</td>
           <td>[[item.customer_name]]</td>
@@ -88,6 +106,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: Array,
           value: [],
           notify: true
+        },
+        sort: {
+          type: Function,
+          notify: true
+        },
+        ascending: {
+          type: Boolean,
+          value: true,
+          notify: true
+        },
+        filter: {
+          type: Function,
+          notify: true
+        },
+        arrow: {
+          type: String,
+          notify: true
         }
       },
 
@@ -98,6 +133,39 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         }
         else {
           return '';
+        }
+      },
+
+      updateSort: function(e) {
+        var target = e.path[0];
+        var buttons = Polymer.dom(this.root).querySelectorAll('button');
+        buttons.forEach(function(button) {
+          button.className = '';
+        });
+        var prop = e.path[0].value;
+        if (this.ascending) {
+          this.sort = this.setSort(1, prop);
+          this.ascending = false;
+          this.arrow = 'up';
+          target.className = 'up';
+        }
+        else {
+          this.sort = this.setSort(-1, prop);
+          this.ascending = true;
+          this.arrow = 'down';
+          target.className = 'down';
+        }
+      },
+
+      setSort: function(val, property) {
+        return function(a, b) {
+          if (a[property] < b[property]) {
+            return -val;
+          }
+          else if (a[property] > b[property]) {
+            return val;
+          }
+          return 0;
         }
       }
 
