@@ -92,7 +92,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       </app-drawer>
 
       <!-- Main content -->
-      <app-header-layout has-scrolling-region>
+      <app-header-layout>
 
         <app-header condenses reveals effects="waterfall">
           <app-toolbar>
@@ -156,8 +156,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _routePageChanged: function(page) {
         this.page = page || 'home';
+        Polymer.AppLayout.scroll({top: 0, behavior: 'silent'});
         var drawer = this.$$('app-drawer');
-        if (drawer.opened && window.innerWidth < 641) {
+        if (drawer.opened && window.innerWidth <= 640) {
           drawer.close();
         }
       },
