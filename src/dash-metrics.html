@@ -10,40 +10,66 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/google-chart/google-chart.html">
-<link rel="import" href="shared-styles.html">
 
-<dom-module id="my-view2">
+<dom-module id="dash-metrics">
   <template>
-    <style include="shared-styles">
+    <style>
       :host {
         display: block;
         padding: 10px;
       }
 
       section {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
         opacity: 0;
         transition: opacity 300ms;
       }
+
+      google-chart {
+        margin: 0.3em;
+      }
+
+      h2 {
+        width: 100%;
+        text-align: center;
+      }
     </style>
     <section id="charts">
+      <h2>Open Issues: [[openIssues]]</h2>
       <google-chart
           type="line"
-          options=""
+          options='{"title":"Number of Customers"}'
           cols='[{"label":"Year", "type":"string"}, {"label":"Customers", "type":"number"}]'
           rows="[[customers]]"></google-chart>
-      <button on-tap="changeData">Change Data</button>
+      <google-chart
+          type="bar"
+          options='{"title":"Number of Reported Issues"}'
+          cols='[{"label":"Year", "type":"string"}, {"label": "Issues", "type": "number"}]'
+          rows="[[totalIssues]]"></google-chart>
     </section>
   </template>
 
   <script>
     Polymer({
 
-      is: 'my-view2',
+      is: 'dash-metrics',
 
       properties: {
+        openIssues: {
+          type: Number,
+          value: 0,
+          notify: true
+        },
         customers: {
           type: Array,
-          value: [["2015", 14756], ["2016", 15439]],
+          value: [],
+          notify: true
+        },
+        totalIssues: {
+          type: Array,
+          value: [["2016",20], ["2015",19]],
           notify: true
         }
       },
@@ -54,10 +80,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 
       _display: function() {
         this.$.charts.style.opacity = 1;
-      },
-
-      changeData: function() {
-        this.customers = [["2014", 14943],["2015", 14756], ["2016", 15439]];
       }
     });
   </script>
