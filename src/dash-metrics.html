@@ -1,13 +1,4 @@
-<!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
-
+<!-- KEY METRICS VIEW: Displays number of open issues, a line chart for number of customers, and a bar chart for number of issues -->
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/google-chart/google-chart.html">
 <link rel="import" href="shared-styles.html">
@@ -68,14 +59,6 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           value: [["2016",20], ["2015",19]],
           notify: true
         }
-      },
-
-      listeners: {
-        'google-chart-ready': '_display'
-      },
-
-      _display: function() {
-        this.$.charts.style.opacity = 1;
       }
     });
   </script>

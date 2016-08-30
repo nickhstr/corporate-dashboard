@@ -1,13 +1,4 @@
-<!--
-@license
-Copyright (c) 2016 The Polymer Project Authors. All rights reserved.
-This code may only be used under the BSD style license found at http://polymer.github.io/LICENSE.txt
-The complete set of authors may be found at http://polymer.github.io/AUTHORS.txt
-The complete set of contributors may be found at http://polymer.github.io/CONTRIBUTORS.txt
-Code distributed by Google as part of the polymer project is also
-subject to an additional IP rights grant found at http://polymer.github.io/PATENTS.txt
--->
-
+<!-- APP SHELL: Holds shell of application, including routing and data handling -->
 <link rel="import" href="../bower_components/polymer/polymer.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer/app-drawer.html">
 <link rel="import" href="../bower_components/app-layout/app-drawer-layout/app-drawer-layout.html">
@@ -273,7 +264,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       // Use setInterval to fetch data every 3 seconds, for close to real-time updates
       ready: function() {
         var self = this;
+        // Call parseCsv once to load data immediately
         this.parseCsv('/data/key-metrics.csv');
+        // The interval for data fetching
         setInterval(function() {
           self.parseCsv('/data/key-metrics.csv');
           self.$.issuesAjax.generateRequest();
@@ -297,10 +290,13 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           return item;
         });
         customers.reverse();
+        // Data for metrics view
         this.customers = customers;
+        // Total customer count for this year, used on the home view
         this.totalCustomers = customers[5][1];
       },
 
+      // Response handler for ajax call to the issues data
       handleIssues: function(e) {
         this.setOpenIssues(e.detail.response);
         this.setTotalIssues(e.detail.response);
@@ -308,12 +304,14 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.totalCount = this.allIssues.length;
       },
 
+      // Response handler for ajax call to the employee locations data
       handleLocations: function(e) {
         this.locations = e.detail.response;
         this.totalLocations = this.locations.length;
         this.totalEmployees = this.setEmployeeCount(this.locations);
       },
 
+      // Set openIssues by filter the data for issues with a truthy "open" property
       setOpenIssues: function(data) {
         var openIssues = data.filter(function(item) {
           return item.open;
@@ -321,6 +319,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.openIssues = openIssues.length;
       },
 
+      // Set total count of issues for each reported year
       setTotalIssues: function(data) {
         var totalIssues = [['2011',0], ['2012',0], ['2013',0], ['2014',0], ['2015',0], ['2016',0]];
         data.forEach(function(issue) {
@@ -336,6 +335,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.totalIssues = totalIssues;
       },
 
+      // Get the total count for employees
       setEmployeeCount: function(locations) {
         var total = 0;
         locations.forEach(function(place) {
