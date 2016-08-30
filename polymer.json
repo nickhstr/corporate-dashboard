@@ -2,10 +2,11 @@
   "entrypoint": "index.html",
   "shell": "src/dash-app.html",
   "fragments": [
+    "src/dash-home.html",
     "src/dash-map.html",
     "src/dash-metrics.html",
     "src/dash-issues.html",
-    "src/dash-view404.html"
+    "src/dash-404.html"
   ],
   "sourceGlobs": [
    "src/**/*",
