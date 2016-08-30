@@ -12,21 +12,28 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/paper-dropdown-menu/paper-dropdown-menu.html">
 <link rel="import" href="../bower_components/paper-listbox/paper-listbox.html">
 <link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="shared-styles.html">
 
 <dom-module id="dash-issues">
   <template>
-    <style>
+    <style include="shared-styles">
       :host {
         display: block;
-        padding: 10px;
+      }
+
+      paper-dropdown-menu {
+        margin: 10px;
+      }
+
+      #tableContainer {
+        overflow-x: scroll;
       }
 
       table {
         border-collapse: collapse;
         font-size: 0.8em;
-        box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.14),
-                  0 1px 5px 0 rgba(0, 0, 0, 0.12),
-                  0 3px 1px -2px rgba(0, 0, 0, 0.2);
+        width: calc(100% - 20px);
+        margin: 10px;
       }
 
       td {
@@ -49,6 +56,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         font-size: inherit;
         font-family: inherit;
         padding: 1.5em 1em;
+        width: 100%;
       }
 
       button:hover {
@@ -60,7 +68,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .up, .down {
-        background-color: var(--app-selected-color);
+        background-color: var(--app-secondary-color);
+        color: #fff;
+        font-weight: 400;
       }
 
       .up::after {
@@ -74,41 +84,61 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
 
-      @media (max-width: 640) {
-        td, th {
+      @media (max-width: 1200px) {
+        .description {
+          max-width: 10em;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+
+      @media (max-width: 1050px) {
+        table {
+          font-size: 0.5em;
+        }
+      }
+
+      @media (max-width: 640px) {
+        td {
           padding: 0.5em;
         }
       }
     </style>
-    <paper-dropdown-menu label="Filter" value="{{filterValue}}">
-      <paper-listbox class="dropdown-content">
-        <paper-item role="option">None</paper-item>
-        <paper-item role="option">Open</paper-item>
-        <paper-item role="option">Closed</paper-item>
-      </paper-listbox>
-    </paper-dropdown-menu>
-    <table>
-      <tr>
-        <th><button on-tap="_updateSort" value="opened_timestamp">Opened</button></th>
-        <th><button on-tap="_updateSort" value="customer_name">Customer</button></th>
-        <th><button on-tap="_updateSort" value="email">Email</button></th>
-        <th><button on-tap="_updateSort" value="description">Description</button></th>
-        <th><button on-tap="_updateSort" value="open">Open</button></th>
-        <th><button on-tap="_updateSort" value="closed_timestamp">Closed</button></th>
-        <th><button on-tap="_updateSort" value="employee_name">Employee</button></th>
-      </tr>
-      <template is="dom-repeat" items="[[issues]]" sort="[[sort]]" filter="[[filter]]">
-        <tr>
-          <td>[[_computeDate(item.opened_timestamp)]]</td>
-          <td>[[item.customer_name]]</td>
-          <td>[[item.email]]</td>
-          <td>[[item.description]]</td>
-          <td class="open-status">[[item.open]]</td>
-          <td>[[_computeDate(item.closed_timestamp)]]</td>
-          <td>[[item.employee_name]]</td>
-        </tr>
-      </template>
-    </table>
+    <section>
+      <h2>Total Number of Issues: [[total]]</h2>
+      <paper-dropdown-menu label="Filter" value="{{filterValue}}">
+        <paper-listbox class="dropdown-content">
+          <paper-item role="option">None</paper-item>
+          <paper-item role="option">Open</paper-item>
+          <paper-item role="option">Closed</paper-item>
+        </paper-listbox>
+      </paper-dropdown-menu>
+      <section id="tableContainer">
+        <table class="shadow">
+          <tr>
+            <th><button on-tap="_updateSort" value="opened_timestamp">Opened</button></th>
+            <th><button on-tap="_updateSort" value="customer_name">Customer</button></th>
+            <th><button on-tap="_updateSort" value="email">Email</button></th>
+            <th><button on-tap="_updateSort" value="description">Description</button></th>
+            <th><button on-tap="_updateSort" value="open">Open</button></th>
+            <th><button on-tap="_updateSort" value="closed_timestamp">Closed</button></th>
+            <th><button on-tap="_updateSort" value="employee_name">Employee</button></th>
+          </tr>
+          <template is="dom-repeat" items="[[issues]]" sort="[[sort]]" filter="[[filter]]">
+            <tr>
+              <td>[[_computeDate(item.opened_timestamp)]]</td>
+              <td>[[item.customer_name]]</td>
+              <td>[[item.email]]</td>
+              <td class="description" title$="[[item.description]]">[[item.description]]</td>
+              <td class="open-status">[[item.open]]</td>
+              <td>[[_computeDate(item.closed_timestamp)]]</td>
+              <td>[[item.employee_name]]</td>
+            </tr>
+          </template>
+        </table>
+      </section>
+    </section>
   </template>
 
   <script>
@@ -120,6 +150,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         issues: {
           type: Array,
           value: [],
+          notify: true
+        },
+        total: {
+          type: Number,
+          value: 0,
           notify: true
         },
         sort: {
@@ -154,15 +189,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       ready: function() {
-        this.sort = function(a, b) {
-          if (a['opened_timestamp'] < b['opened_timestamp']) {
-            return -1;
-          }
-          else if (a['opened_timestamp'] > b['opened_timestamp']) {
-            return 1;
-          }
-          return 0;
-        };
+        this.sort = this.setSort(1, 'opened_timestamp');
         this.ascending = false;
         this.arrow = 'up';
         this.$$('button').className = 'up';
