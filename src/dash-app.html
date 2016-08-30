@@ -45,7 +45,7 @@
         display: block;
         padding: 0 16px;
         text-decoration: none;
-        color: #444;
+        color: #555;
         line-height: 40px;
       }
 
@@ -58,13 +58,15 @@
         padding: 0 16px;
         text-transform: uppercase;
         margin: 1em 0;
-        color: #444;
-        font-weight: 100;
+        color: #555;
+        font-weight: 300;
       }
 
       iron-icon {
         color: inherit;
         margin: 0 5px 5px 0;
+        width: 20px;
+        height: 20px;
       }
 
       a.category {
@@ -213,7 +215,10 @@
           type: String,
           value: '',
           notify: true
-        }
+        },
+        mapInterval: {},
+        metricsInterval: {},
+        issuesInterval: {},
       },
 
       observers: [
@@ -221,24 +226,43 @@
       ],
 
       _routePageChanged: function(page) {
+        var self = this;
         this.page = page || 'home';
         switch (page) {
           case 'home':
             this.subtitle = ' Home';
             this.subtitleIcon = 'home';
+            clearInterval(this.mapInterval);
+            clearInterval(this.metricsInterval);
+            clearInterval(this.issuesInterval);
             break;
           case 'map':
             this.subtitle = ' Map';
             this.subtitleIcon = 'room';
+            clearInterval(this.metricsInterval);
+            clearInterval(this.issuesInterval);
+            this.mapInterval = setInterval(function() {
+              self.$.locationsAjax.generateRequest();
+            }, 3000);
             break;
           case 'metrics':
             this.subtitle = ' Key Metrics';
             this.subtitleIcon = 'assessment';
+            clearInterval(this.mapInterval);
+            clearInterval(this.issuesInterval);
+            this.metricsInterval = setInterval(function() {
+              self.parseCsv('/data/key-metrics.csv');
+            }, 3000);
             break;
           case 'issues':
             this.subtitle = ' All Issues';
             this.subtitleIcon = 'error';
             break;
+            clearInterval(this.mapInterval);
+            clearInterval(this.metricsInterval);
+            this.issuesInterval = setInterval(function() {
+              self.$.issuesAjax.generateRequest();
+            }, 3000);
           default:
             this.subtitle = '';
             this.subtitleIcon = '';
@@ -267,11 +291,11 @@
         // Call parseCsv once to load data immediately
         this.parseCsv('/data/key-metrics.csv');
         // The interval for data fetching
-        setInterval(function() {
-          self.parseCsv('/data/key-metrics.csv');
-          self.$.issuesAjax.generateRequest();
-          self.$.locationsAjax.generateRequest();
-        }, 3000);
+        // setInterval(function() {
+        //   self.parseCsv('/data/key-metrics.csv');
+        //   self.$.issuesAjax.generateRequest();
+        //   self.$.locationsAjax.generateRequest();
+        // }, 3000);
       },
 
       parseCsv: function(pathToCsv) {
