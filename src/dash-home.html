@@ -16,22 +16,112 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
     <style include="shared-styles">
       :host {
         display: block;
+      }
 
-        padding: 10px;
+      h2 {
+        margin: 0;
+      }
+
+      section, div {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+      }
+
+      section {
+        padding: 5px;
+      }
+
+      div {
+        width: calc(50% - 10px);
+        height: 275px;
+        text-align: center;
+        background-color: gray;
+        align-items: center;
+        margin: 5px;
+        font-weight: 300;
+        background-color: #64B5F6;
+      }
+
+      h3, p {
+        width: 100%;
+        margin: 0;
+      }
+
+      h3 {
+        font-size: 1em;
+        font-weight: 300;
+      }
+
+      p {
+        font-size: 4em;
+      }
+
+
+      @media (min-width: 1300px) {
+        div {
+          width: 500px;
+        }
+      }
+
+      @media (max-width: 550px) {
+        div {
+          width: calc(100% - 10px);
+        }
       }
     </style>
-
-    <div class="card">
-      <div class="circle">1</div>
-      <h1>View One</h1>
-      <p>Ut labores minimum atomorum pro. Laudem tibique ut has.
-      <p>Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Lorem ipsum dolor sit amet, per in nusquam nominavi periculis, sit elit oportere ea.Cu mei vide viris gloriatur, at populo eripuit sit.</p>
-    </div>
+    <h2>Overview</h2>
+    <section>
+      <div class="shadow">
+        <h3>Open Issues out of Total</h3>
+        <p>[[openIssues]] / [[totalIssues]]</p>
+      </div>
+      <div class="shadow">
+        <h3>Number of Company Locations</h3>
+        <p>[[totalLocations]]</p>
+      </div>
+      <div class="shadow">
+        <h3>Total Employees</h3>
+        <p>[[totalEmployees]]</p>
+      </div>
+      <div class="shadow">
+        <h3>Total Customers</h3>
+        <p>[[totalCustomers]]</p>
+      </div>
+    </section>
   </template>
 
   <script>
     Polymer({
-      is: 'dash-home'
+      is: 'dash-home',
+
+      properties: {
+        openIssues: {
+          type: Number,
+          value: 0,
+          notify: true
+        },
+        totalIssues: {
+          type: Number,
+          value: 0,
+          notify: true
+        },
+        totalLocations: {
+          type: Number,
+          value: 0,
+          notify: true
+        },
+        totalEmployees: {
+          type: Number,
+          value: 0,
+          notify: true
+        },
+        totalCustomers: {
+          type: Number,
+          value: 0,
+          notify: true
+        }
+      }
     });
   </script>
 </dom-module>
