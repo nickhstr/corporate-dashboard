@@ -20,9 +20,9 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-ajax/iron-ajax.html">
 <link rel="import" href="papa-parse.html">
-<link rel="import" href="my-icons.html">
 
 <dom-module id="dash-app">
   <template>
@@ -59,8 +59,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       }
 
       .drawer-list a.iron-selected {
-        color: black;
-        font-weight: bold;
+        color: #0D47A1;
         background-color: var(--app-selected-color);
       }
 
@@ -70,6 +69,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         margin: 1em 0;
         color: #444;
         font-weight: 100;
+      }
+
+      iron-icon {
+        color: inherit;
+        margin: 0 5px 5px 0;
       }
 
       a.category {
@@ -106,11 +110,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       <app-drawer swipe-open>
         <app-toolbar>Menu</app-toolbar>
         <iron-selector selected="[[page]]" attr-for-selected="name" class="drawer-list" role="navigation">
-          <a name="home" href="/home">Home</a>
+          <a name="home" href="/home"><iron-icon icon="home"></iron-icon>Home</a>
           <h4 class="divider">Data Views</h4>
-          <a class="category" name="map" href="/map">Map</a>
-          <a class="category" name="metrics" href="/metrics">Key Metrics</a>
-          <a class="category" name="issues" href="/issues">All Issues</a>
+          <a class="category" name="map" href="/map"><iron-icon icon="room"></iron-icon>Map</a>
+          <a class="category" name="metrics" href="/metrics"><iron-icon icon="assessment"></iron-icon>Key Metrics</a>
+          <a class="category" name="issues" href="/issues"><iron-icon icon="error"></iron-icon>All Issues</a>
         </iron-selector>
       </app-drawer>
 
@@ -121,7 +125,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           <app-toolbar>
             <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
             <div main-title>Dashboard</div>
-            <div class="subtitle">[[subtitle]]</div>
+            <div class="subtitle"><iron-icon icon$="[[subtitleIcon]]"></iron-icon>[[subtitle]]</div>
           </app-toolbar>
         </app-header>
 
@@ -213,6 +217,11 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
           type: String,
           value: '',
           notify: true
+        },
+        subtitleIcon: {
+          type: String,
+          value: '',
+          notify: true
         }
       },
 
@@ -225,18 +234,23 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         switch (page) {
           case 'home':
             this.subtitle = ' Home';
+            this.subtitleIcon = 'home';
             break;
           case 'map':
             this.subtitle = ' Map';
+            this.subtitleIcon = 'room';
             break;
           case 'metrics':
             this.subtitle = ' Key Metrics';
+            this.subtitleIcon = 'assessment';
             break;
           case 'issues':
             this.subtitle = ' All Issues';
+            this.subtitleIcon = 'error';
             break;
           default:
             this.subtitle = '';
+            this.subtitleIcon = '';
             break;
         }
         Polymer.AppLayout.scroll({top: 0, behavior: 'silent'});
@@ -247,7 +261,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
       },
 
       _pageChanged: function(page) {
-        // Load page import on demand. Show 404 page if fails
+        // Load page import on demand. Show 404 page if it fails
         var resolvedPageUrl = this.resolveUrl('dash-' + page + '.html');
         this.importHref(resolvedPageUrl, null, this._showPage404, true);
       },
@@ -256,6 +270,7 @@ subject to an additional IP rights grant found at http://polymer.github.io/PATEN
         this.page = '404';
       },
 
+      // Use setInterval to fetch data every 3 seconds, for close to real-time updates
       ready: function() {
         var self = this;
         this.parseCsv('/data/key-metrics.csv');
